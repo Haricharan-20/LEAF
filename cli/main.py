@@ -64,6 +64,10 @@ def show_help():
     print("      Show this help message.")
     print()
 
+    print("  services")
+    print("      List available LEAF services.")
+    print()
+
     print("  exit")
     print("      Exit LEAF.")
     print()
@@ -541,6 +545,59 @@ def run_experiment(name):
 
 
 # --------------------------------------------------
+# Service display
+# --------------------------------------------------
+def show_services():
+
+    runner = LEAFExperimentRunner()
+
+    try:
+
+        services = runner.context.service_metadata()
+
+        print()
+        print("LEAF services:")
+        print()
+
+        if not services:
+            print("No services registered.")
+            print()
+            return
+
+        print("Available services:")
+        print()
+
+        for service in services:
+
+            print(
+                f"  {service['name']}"
+            )
+
+            print(
+                f"      {service['description']}"
+            )
+
+            print(
+                f"      Version: {service['version']}"
+            )
+
+            capability = (
+                service["required_capability"]
+                or "none"
+            )
+
+            print(
+                f"      Required capability: {capability}"
+            )
+
+            print()
+
+    finally:
+
+        runner.close()
+
+
+# --------------------------------------------------
 # CLI
 # --------------------------------------------------
 
@@ -584,6 +641,17 @@ def start_cli():
         # ------------------------------
         # Help
         # ------------------------------
+
+        if action == "services":
+
+            if len(parts) != 1:
+                print(
+                    "Usage: services"
+                )
+                continue
+
+            show_services()
+            continue
 
         if action == "help":
 

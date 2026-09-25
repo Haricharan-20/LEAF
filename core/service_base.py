@@ -5,6 +5,10 @@ class LEAFService:
 
     name = "unnamed"
 
+    description = "No description provided."
+
+    version = "1.0"
+
     required_capability = None
 
     def __init__(
@@ -27,3 +31,15 @@ class LEAFService:
                 "Service requires capability: "
                 + self.required_capability
             )
+
+    @classmethod
+    def metadata(cls):
+
+        return {
+            "name": cls.name,
+            "description": cls.description,
+            "version": cls.version,
+            "required_capability": (
+                cls.required_capability
+            ),
+        }

@@ -25,3 +25,20 @@ class LEAFServiceRegistry:
         return list(
             self.services.keys()
         )
+
+    def metadata(self):
+
+        return [
+            service.metadata()
+            for service in self.services.values()
+        ]
+
+    def metadata_for(self, name):
+
+        service = self.get(name)
+
+        if service is None:
+
+            return None
+
+        return service.metadata()

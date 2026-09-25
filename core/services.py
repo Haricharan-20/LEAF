@@ -6,6 +6,12 @@ class LEAFEventService(LEAFService):
 
     name = "events"
 
+    description = (
+        "Generate and collect LEAF research events."
+    )
+
+    version = "1.0"
+
     required_capability = "storage.read"
 
     def __init__(

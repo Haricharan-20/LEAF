@@ -62,3 +62,11 @@ class LEAFExecutionContext:
             )
 
         return service
+
+    def list_services(self):
+
+        return self.services.names()
+
+    def service_metadata(self):
+
+        return self.services.metadata()
