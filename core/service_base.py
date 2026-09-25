@@ -41,6 +41,27 @@ class LEAFService:
         if self.state == "available":
             self.state = "closed"
 
+    def is_ready(self):
+
+        return self.state == "available"
+
+    def require_ready(self):
+
+        if not self.is_ready():
+
+            raise RuntimeError(
+                "Service is not ready: "
+                + self.name
+            )
+
+    def status(self):
+
+        return {
+            "name": self.name,
+            "state": self.state,
+            "ready": self.is_ready(),
+        }
+
     def check_capability(self):
 
         if (

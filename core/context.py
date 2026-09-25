@@ -86,3 +86,24 @@ class LEAFExecutionContext:
     def service_states(self):
 
         return self.services.states()
+
+    def service_status(self):
+
+        return self.services.status()
+
+    def ready_services(self):
+
+        return [
+            service.name
+            for service in self.services.ready_services()
+        ]
+
+    def all_services_ready(self):
+
+        return self.services.all_ready()
+
+    def require_ready_service(self, name):
+
+        return self.services.require_ready(
+            name
+        )

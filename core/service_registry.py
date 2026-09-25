@@ -62,3 +62,39 @@ class LEAFServiceRegistry:
             name: service.state
             for name, service in self.services.items()
         }
+
+    def ready_services(self):
+
+        return [
+            service
+            for service in self.services.values()
+            if service.is_ready()
+        ]
+
+    def all_ready(self):
+
+        return all(
+            service.is_ready()
+            for service in self.services.values()
+        )
+
+    def require_ready(self, name):
+
+        service = self.get(name)
+
+        if service is None:
+            raise ValueError(
+                "Unknown service: "
+                + name
+            )
+
+        service.require_ready()
+
+        return service
+
+    def status(self):
+
+        return {
+            name: service.status()
+            for name, service in self.services.items()
+        }
