@@ -26,7 +26,11 @@ class PluginInfoExperiment(LEAFExperiment):
             "storage.read"
         )
 
-        return context.events.emit(
+        events = context.require_service(
+            "events"
+        )
+
+        return events.emit(
             event_type="experiment.plugin_info",
             source="plugin.test",
             data={

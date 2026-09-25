@@ -2,6 +2,7 @@ from core.capabilities import LEAFCapabilityManager
 from core.engine import LEAFEngine
 from core.session import LEAFSession
 from core.services import LEAFEventService
+from core.service_registry import LEAFServiceRegistry
 
 
 class LEAFExecutionContext:
@@ -17,9 +18,15 @@ class LEAFExecutionContext:
         self.session = session
         self.capabilities = capability_manager
 
-        self.events = LEAFEventService(
+        self.services = LEAFServiceRegistry()
+
+        events = LEAFEventService(
             engine=engine,
             capability_manager=capability_manager,
+        )
+
+        self.services.register(
+            events
         )
 
     def has_capability(self, capability):
@@ -38,3 +45,20 @@ class LEAFExecutionContext:
                 "Capability not authorized: "
                 + capability
             )
+
+    def get_service(self, name):
+
+        return self.services.get(name)
+
+    def require_service(self, name):
+
+        service = self.get_service(name)
+
+        if service is None:
+
+            raise ValueError(
+                "Unknown service: "
+                + name
+            )
+
+        return service

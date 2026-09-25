@@ -34,7 +34,11 @@ class SystemInfoExperiment(LEAFExperiment):
             "python": platform.python_version(),
         }
 
-        return context.events.emit(
+        events = context.require_service(
+            "events"
+        )
+
+        return events.emit(
             event_type="experiment.system_info",
             source="experiment.system_info",
             data=information,
