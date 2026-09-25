@@ -1,3 +1,4 @@
+from core.context import LEAFExecutionContext
 from core.engine import LEAFEngine
 from core.session import LEAFSession
 from storage.database import LEAFDatabase
@@ -30,6 +31,14 @@ class LEAFExperimentRunner:
             )
         )
 
+        self.context = LEAFExecutionContext(
+            engine=self.engine,
+            session=self.session,
+            capability_manager=(
+                self.catalog.capability_manager
+            ),
+        )
+
     def run(self, experiment_name):
 
         experiment = self.catalog.create(
@@ -37,7 +46,7 @@ class LEAFExperimentRunner:
         )
 
         result = experiment.run(
-            self.engine
+            self.context
         )
 
         self.database.save_event(

@@ -16,11 +16,17 @@ class PluginInfoExperiment(LEAFExperiment):
 
     risk_level = "low"
 
-    required_capabilities = ["storage.read"]
+    required_capabilities = [
+        "storage.read"
+    ]
 
-    def run(self, engine):
+    def run(self, context):
 
-        return engine.emit(
+        context.require_capability(
+            "storage.read"
+        )
+
+        return context.events.emit(
             event_type="experiment.plugin_info",
             source="plugin.test",
             data={

@@ -18,9 +18,15 @@ class SystemInfoExperiment(LEAFExperiment):
 
     risk_level = "low"
 
-    required_capabilities = []
+    required_capabilities = [
+        "system.read"
+    ]
 
-    def run(self, engine):
+    def run(self, context):
+
+        context.require_capability(
+            "system.read"
+        )
 
         information = {
             "platform": platform.system(),
@@ -28,7 +34,7 @@ class SystemInfoExperiment(LEAFExperiment):
             "python": platform.python_version(),
         }
 
-        return engine.emit(
+        return context.events.emit(
             event_type="experiment.system_info",
             source="experiment.system_info",
             data=information,

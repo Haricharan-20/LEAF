@@ -16,7 +16,7 @@ class LEAFExperiment(ABC):
     required_capabilities = []
 
     @abstractmethod
-    def run(self, engine):
+    def run(self, context):
         pass
 
     @classmethod
