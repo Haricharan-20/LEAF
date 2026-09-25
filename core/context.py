@@ -18,7 +18,8 @@ class LEAFExecutionContext:
         self.capabilities = capability_manager
 
         self.events = LEAFEventService(
-            engine
+            engine=engine,
+            capability_manager=capability_manager,
         )
 
     def has_capability(self, capability):
