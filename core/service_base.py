@@ -17,6 +17,29 @@ class LEAFService:
     ):
 
         self.capabilities = capability_manager
+        self.state = "created"
+
+    def initialize(self):
+
+        if self.state != "created":
+            return
+
+        self.state = "initialized"
+
+    def start(self):
+
+        if self.state == "created":
+            self.initialize()
+
+        if self.state != "initialized":
+            return
+
+        self.state = "available"
+
+    def stop(self):
+
+        if self.state == "available":
+            self.state = "closed"
 
     def check_capability(self):
 

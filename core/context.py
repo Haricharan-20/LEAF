@@ -70,3 +70,19 @@ class LEAFExecutionContext:
     def service_metadata(self):
 
         return self.services.metadata()
+
+    def initialize_services(self):
+
+        self.services.initialize_all()
+
+    def start_services(self):
+
+        self.services.start_all()
+
+    def stop_services(self):
+
+        self.services.stop_all()
+
+    def service_states(self):
+
+        return self.services.states()

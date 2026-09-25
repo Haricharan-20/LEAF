@@ -39,6 +39,9 @@ class LEAFExperimentRunner:
             ),
         )
 
+        self.context.initialize_services()
+        self.context.start_services()
+
     def run(self, experiment_name):
 
         experiment = self.catalog.create(
@@ -56,6 +59,8 @@ class LEAFExperimentRunner:
         return result
 
     def close(self):
+
+        self.context.stop_services()
 
         self.session.finish()
 
