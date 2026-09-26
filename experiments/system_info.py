@@ -22,6 +22,10 @@ class SystemInfoExperiment(LEAFExperiment):
         "system.read"
     ]
 
+    required_services = [
+        "events"
+    ]
+
     def run(self, context):
 
         context.require_capability(

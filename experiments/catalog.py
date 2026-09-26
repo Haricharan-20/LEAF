@@ -67,7 +67,41 @@ class LEAFExperimentCatalog:
             self.experiments.keys()
         )
 
-    def create(self, name):
+    def validate_services(
+        self,
+        service_registry,
+        required_services,
+    ):
+
+        unavailable = []
+
+        for service_name in required_services:
+
+            service = service_registry.get(
+                service_name
+            )
+
+            if service is None:
+
+                unavailable.append(
+                    service_name
+                    + " (unknown)"
+                )
+
+            elif not service.is_ready():
+
+                unavailable.append(
+                    service_name
+                    + " (not ready)"
+                )
+
+        return unavailable
+
+    def create(
+        self,
+        name,
+        service_registry=None,
+    ):
 
         experiment_class = self.get(name)
 
@@ -109,5 +143,39 @@ class LEAFExperimentCatalog:
                 "unauthorized capabilities: "
                 + ", ".join(denied)
             )
+
+        required_services = (
+            experiment_class.required_services
+        )
+
+        if (
+            required_services
+            and service_registry is None
+        ):
+
+            raise ValueError(
+                "Experiment requires "
+                "service validation: "
+                + ", ".join(required_services)
+            )
+
+        if service_registry is not None:
+
+            unknown_services = (
+                self.validate_services(
+                    service_registry,
+                    required_services,
+                )
+            )
+
+            if unknown_services:
+
+                raise ValueError(
+                    "Experiment requires "
+                    "unknown services: "
+                    + ", ".join(
+                        unknown_services
+                    )
+                )
 
         return experiment_class()

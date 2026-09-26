@@ -45,7 +45,8 @@ class LEAFExperimentRunner:
     def run(self, experiment_name):
 
         experiment = self.catalog.create(
-            experiment_name
+            experiment_name,
+            service_registry=self.context.services,
         )
 
         result = experiment.run(

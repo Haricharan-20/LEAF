@@ -15,6 +15,8 @@ class LEAFExperiment(ABC):
 
     required_capabilities = []
 
+    required_services = []
+
     @abstractmethod
     def run(self, context):
         pass
@@ -28,5 +30,10 @@ class LEAFExperiment(ABC):
             "version": cls.version,
             "category": cls.category,
             "risk_level": cls.risk_level,
-            "required_capabilities": cls.required_capabilities,
+            "required_capabilities": (
+                cls.required_capabilities
+            ),
+            "required_services": (
+                cls.required_services
+            ),
         }
