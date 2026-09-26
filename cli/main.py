@@ -32,6 +32,10 @@ def show_help():
     print("      Show experiment metadata.")
     print()
 
+    print("  requirements <name>")
+    print("      Show experiment execution requirements.")
+    print()
+
     print("  capabilities")
     print("      Show available and allowed capabilities.")
     print()
@@ -223,6 +227,77 @@ def show_experiment(name):
 
     print()
 
+
+
+# --------------------------------------------------
+# Experiment requirements
+# --------------------------------------------------
+
+def show_requirements(name):
+
+    runner = LEAFExperimentRunner()
+
+    try:
+        experiment = runner.catalog.get(name)
+
+        print()
+
+        if experiment is None:
+            print(f"Experiment not found: {name}")
+            print()
+            return
+
+        report = runner.catalog.requirements(
+            name,
+            runner.context.services,
+        )
+
+        print(f"Experiment requirements: {name}")
+        print()
+
+        print(
+            "Status:",
+            "READY" if report["valid"] else "NOT READY"
+        )
+
+        print()
+        print("Required capabilities:")
+
+        for capability in experiment.required_capabilities:
+
+            if capability in report["unknown_capabilities"]:
+                state = "UNKNOWN"
+            elif capability in report["unauthorized_capabilities"]:
+                state = "UNAUTHORIZED"
+            else:
+                state = "AVAILABLE"
+
+            print(f"  {capability}: {state}")
+
+        if not experiment.required_capabilities:
+            print("  none")
+
+        print()
+        print("Required services:")
+
+        for service in experiment.required_services:
+
+            if service in report["unknown_services"]:
+                state = "UNKNOWN"
+            elif service in report["unready_services"]:
+                state = "NOT READY"
+            else:
+                state = "AVAILABLE"
+
+            print(f"  {service}: {state}")
+
+        if not experiment.required_services:
+            print("  none")
+
+        print()
+
+    finally:
+        runner.close()
 
 # --------------------------------------------------
 # Event display
@@ -697,6 +772,27 @@ def start_cli():
                 continue
 
             show_experiment(
+                parts[1]
+            )
+
+        # ------------------------------
+        # Experiment requirements
+        # ------------------------------
+
+        elif action == "requirements":
+
+            if len(parts) != 2:
+
+                print()
+                print(
+                    "Usage: "
+                    "requirements <name>"
+                )
+                print()
+
+                continue
+
+            show_requirements(
                 parts[1]
             )
 

@@ -67,35 +67,161 @@ class LEAFExperimentCatalog:
             self.experiments.keys()
         )
 
+    def validate_requirements(
+        self,
+        experiment_class,
+        service_registry=None,
+    ):
+
+        report = {
+            "valid": True,
+            "unknown_capabilities": [],
+            "unauthorized_capabilities": [],
+            "unknown_services": [],
+            "unready_services": [],
+            "service_validation_missing": [],
+        }
+
+        required_capabilities = (
+            experiment_class.required_capabilities
+        )
+
+        report[
+            "unknown_capabilities"
+        ] = (
+            self.capability_manager.validate(
+                required_capabilities
+            )
+        )
+
+        report[
+            "unauthorized_capabilities"
+        ] = (
+            self.capability_manager.authorize(
+                required_capabilities
+            )
+        )
+
+        required_services = (
+            experiment_class.required_services
+        )
+
+        if (
+            required_services
+            and service_registry is None
+        ):
+
+            report[
+                "service_validation_missing"
+            ] = list(
+                required_services
+            )
+
+        elif service_registry is not None:
+
+            for service_name in required_services:
+
+                service = service_registry.get(
+                    service_name
+                )
+
+                if service is None:
+
+                    report[
+                        "unknown_services"
+                    ].append(
+                        service_name
+                    )
+
+                elif not service.is_ready():
+
+                    report[
+                        "unready_services"
+                    ].append(
+                        service_name
+                    )
+
+        report["valid"] = not any(
+            (
+                report[
+                    "unknown_capabilities"
+                ],
+                report[
+                    "unauthorized_capabilities"
+                ],
+                report[
+                    "unknown_services"
+                ],
+                report[
+                    "unready_services"
+                ],
+                report[
+                    "service_validation_missing"
+                ],
+            )
+        )
+
+        return report
+
     def validate_services(
         self,
         service_registry,
         required_services,
     ):
 
+        report = self.validate_requirements(
+            type(
+                "ServiceRequirement",
+                (),
+                {
+                    "required_capabilities": [],
+                    "required_services": (
+                        required_services
+                    ),
+                },
+            ),
+            service_registry,
+        )
+
         unavailable = []
 
-        for service_name in required_services:
-
-            service = service_registry.get(
-                service_name
+        unavailable.extend(
+            service
+            + " (unknown)"
+            for service in (
+                report["unknown_services"]
             )
+        )
 
-            if service is None:
-
-                unavailable.append(
-                    service_name
-                    + " (unknown)"
-                )
-
-            elif not service.is_ready():
-
-                unavailable.append(
-                    service_name
-                    + " (not ready)"
-                )
+        unavailable.extend(
+            service
+            + " (not ready)"
+            for service in (
+                report["unready_services"]
+            )
+        )
 
         return unavailable
+
+    def requirements(
+        self,
+        name,
+        service_registry=None,
+    ):
+
+        experiment_class = self.get(name)
+
+        if experiment_class is None:
+
+            raise ValueError(
+                f"Unknown experiment: "
+                f"{name}"
+            )
+
+        return self.validate_requirements(
+            experiment_class,
+            service_registry,
+        )
 
     def create(
         self,
@@ -112,70 +238,69 @@ class LEAFExperimentCatalog:
                 f"{name}"
             )
 
-        required = (
-            experiment_class.required_capabilities
+        report = self.validate_requirements(
+            experiment_class,
+            service_registry,
         )
 
-        unknown = (
-            self.capability_manager.validate(
-                required
-            )
-        )
-
-        if unknown:
+        if report["unknown_capabilities"]:
 
             raise ValueError(
                 "Experiment requires "
                 "unknown capabilities: "
-                + ", ".join(unknown)
+                + ", ".join(
+                    report[
+                        "unknown_capabilities"
+                    ]
+                )
             )
 
-        denied = (
-            self.capability_manager.authorize(
-                required
-            )
-        )
-
-        if denied:
+        if report["unauthorized_capabilities"]:
 
             raise PermissionError(
                 "Experiment requires "
                 "unauthorized capabilities: "
-                + ", ".join(denied)
+                + ", ".join(
+                    report[
+                        "unauthorized_capabilities"
+                    ]
+                )
             )
 
-        required_services = (
-            experiment_class.required_services
-        )
-
-        if (
-            required_services
-            and service_registry is None
-        ):
+        if report["service_validation_missing"]:
 
             raise ValueError(
                 "Experiment requires "
                 "service validation: "
-                + ", ".join(required_services)
-            )
-
-        if service_registry is not None:
-
-            unknown_services = (
-                self.validate_services(
-                    service_registry,
-                    required_services,
+                + ", ".join(
+                    report[
+                        "service_validation_missing"
+                    ]
                 )
             )
 
-            if unknown_services:
+        if report["unknown_services"]:
 
-                raise ValueError(
-                    "Experiment requires "
-                    "unknown services: "
-                    + ", ".join(
-                        unknown_services
-                    )
+            raise ValueError(
+                "Experiment requires "
+                "unknown services: "
+                + ", ".join(
+                    report[
+                        "unknown_services"
+                    ]
                 )
+            )
+
+        if report["unready_services"]:
+
+            raise RuntimeError(
+                "Experiment requires "
+                "ready services: "
+                + ", ".join(
+                    report[
+                        "unready_services"
+                    ]
+                )
+            )
 
         return experiment_class()
